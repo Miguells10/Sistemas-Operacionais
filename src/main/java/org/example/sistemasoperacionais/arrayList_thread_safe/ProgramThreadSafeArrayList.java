@@ -7,42 +7,12 @@ public class ProgramThreadSafeArrayList { //testar todas as funcoes da ThreadSaf
 
     public static void main(String[] args) throws InterruptedException {
 
-        //ThreadSafeArrayList<Integer> listaSegura = new ThreadSafeArrayList<>();
-
         System.out.println("INICIANDO TESTES PARA A ThreadSafeArrayList");
 
         testaFuncionalidadeBasica();
         testaEstresseDeConcorrencia();
 
-
         System.out.println("TODOS OS TESTES FORAM CONCLUÍDOS!");
-
-        //cria duas threads pra adicionar elementos na lista
-//        Thread thread1 = new Thread(() -> {
-//            for (int i = 0; i < 1000; i++) {
-//                listaSegura.add(i);
-//            }
-//        });
-//
-//        Thread thread2 = new Thread(() -> {
-//            for (int i = 0; i < 1000; i++) {
-//                listaSegura.add(i);
-//            }
-//        });
-//
-//        //começa a execução das threads
-//        thread1.start();
-//        thread2.start();
-//
-//        //espera as threads terminarem
-//        try {
-//            thread1.join();
-//            thread2.join();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//        System.out.println("Tamanho final da lista: " + listaSegura.size());
-
     }
 
     public static void testaFuncionalidadeBasica(){ //add, get, size, remove, contains, clear
