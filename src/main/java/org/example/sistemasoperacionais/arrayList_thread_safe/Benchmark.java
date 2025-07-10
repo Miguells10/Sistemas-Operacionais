@@ -13,10 +13,10 @@ public class Benchmark {
         for (int tamanho : TAMANHOS) {
             System.out.println("\n===== TAMANHO: " + tamanho + " =====");
 
-            System.out.println("------ BENCHMARK: 1 THREAD ------");
+            System.out.println("------ TESTE: 1 THREAD ------");
             testarDesempenho1Thread(tamanho);
 
-            System.out.println("\n------ BENCHMARK: 16 THREADS ------");
+            System.out.println("\n------ TESTE: 16 THREADS ------");
             try {
                 testarDesempenho16Threads(tamanho);
             } catch (InterruptedException e) {
@@ -26,58 +26,54 @@ public class Benchmark {
         }
     }
 
+    // Testes com 1 thread: ArrayList vs ThreadSafeArrayList
     private static void testarDesempenho1Thread(int numOperacoes) {
-        testarOperacoesArrayList("ArrayList", new ArrayList<>(), numOperacoes);
-        testarOperacoesArrayList("Vector", new Vector<>(), numOperacoes);
-        testarOperacoesThreadSafeArrayList("ThreadSafeArrayList", new ThreadSafeArrayList<>(), numOperacoes);
+        testarOperacoes("ArrayList", new ArrayList<>(), numOperacoes);
+        testarOperacoesThreadSafe("ThreadSafeArrayList", new ThreadSafeArrayList<>(), numOperacoes);
     }
 
-    // Usado para ArrayList e Vector (que implementam List)
-    private static void testarOperacoesArrayList(String nome, List<Integer> lista, int numOperacoes) {
+    private static void testarOperacoes(String nome, List<Integer> lista, int numOperacoes) {
         Random rand = new Random();
 
         // Inserção
         long inicio = System.nanoTime();
         for (int i = 0; i < numOperacoes; i++) {
-            lista.add(i);
+            lista.add(rand.nextInt());
         }
-        long duracao = System.nanoTime() - inicio;
-        imprimirResultado(nome, "Inserção", numOperacoes, duracao);
+        long duracaoInsercao = System.nanoTime() - inicio;
+        imprimirResultado(nome, "Inserção", numOperacoes, duracaoInsercao);
 
         // Busca
         inicio = System.nanoTime();
         for (int i = 0; i < numOperacoes; i++) {
             if (!lista.isEmpty()) {
-                // Removida a variável dummy não utilizada
-                lista.get(rand.nextInt(lista.size()));
                 lista.get(rand.nextInt(lista.size()));
             }
         }
-
-        duracao = System.nanoTime() - inicio;
-        imprimirResultado(nome, "Busca", numOperacoes, duracao);
+        long duracaoBusca = System.nanoTime() - inicio;
+        imprimirResultado(nome, "Busca", numOperacoes, duracaoBusca);
 
         // Remoção
         inicio = System.nanoTime();
         for (int i = 0; i < numOperacoes; i++) {
             if (!lista.isEmpty()) {
-                lista.remove(lista.size() - 1);
+                lista.remove(rand.nextInt(lista.size()));
             }
         }
-        duracao = System.nanoTime() - inicio;
-        imprimirResultado(nome, "Remoção", numOperacoes, duracao);
+        long duracaoRemocao = System.nanoTime() - inicio;
+        imprimirResultado(nome, "Remoção", numOperacoes, duracaoRemocao);
     }
 
-    private static void testarOperacoesThreadSafeArrayList(String nome, ThreadSafeArrayList<Integer> lista, int numOperacoes) {
+    private static void testarOperacoesThreadSafe(String nome, ThreadSafeArrayList<Integer> lista, int numOperacoes) {
         Random rand = new Random();
 
         // Inserção
         long inicio = System.nanoTime();
         for (int i = 0; i < numOperacoes; i++) {
-            lista.add(i);
+            lista.add(rand.nextInt());
         }
-        long duracao = System.nanoTime() - inicio;
-        imprimirResultado(nome, "Inserção", numOperacoes, duracao);
+        long duracaoInsercao = System.nanoTime() - inicio;
+        imprimirResultado(nome, "Inserção", numOperacoes, duracaoInsercao);
 
         // Busca
         inicio = System.nanoTime();
@@ -86,49 +82,50 @@ public class Benchmark {
                 lista.get(rand.nextInt(lista.size()));
             }
         }
-        duracao = System.nanoTime() - inicio;
-        imprimirResultado(nome, "Busca", numOperacoes, duracao);
+        long duracaoBusca = System.nanoTime() - inicio;
+        imprimirResultado(nome, "Busca", numOperacoes, duracaoBusca);
 
         // Remoção
         inicio = System.nanoTime();
         for (int i = 0; i < numOperacoes; i++) {
             if (lista.size() > 0) {
-                lista.remove(lista.size() - 1);
+                lista.remove(rand.nextInt(lista.size()));
             }
         }
-        duracao = System.nanoTime() - inicio;
-        imprimirResultado(nome, "Remoção", numOperacoes, duracao);
+        long duracaoRemocao = System.nanoTime() - inicio;
+        imprimirResultado(nome, "Remoção", numOperacoes, duracaoRemocao);
     }
 
+    // Testes com 16 threads: Vector e ThreadSafeArrayList
     private static void testarDesempenho16Threads(int numOperacoes) throws InterruptedException {
-        testarConcorrenciaVector("Vector", new Vector<>(), numOperacoes);
-        testarConcorrenciaThreadSafeArrayList("ThreadSafeArrayList", new ThreadSafeArrayList<>(), numOperacoes);
+        testarConcorrencia("Vector", new Vector<>(), numOperacoes);
+        testarConcorrenciaThreadSafe("ThreadSafeArrayList", new ThreadSafeArrayList<>(), numOperacoes);
     }
 
-    // Concorrência para Vector (que é List)
-    private static void testarConcorrenciaVector(String nome, List<Integer> listaCompartilhada, int numOperacoes) throws InterruptedException {
+    private static void testarConcorrencia(String nome, List<Integer> listaCompartilhada, int numOperacoes) throws InterruptedException {
         ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
         try {
-            AtomicInteger contador = new AtomicInteger();
             Random rand = new Random();
-
             int operacoesPorThread = numOperacoes / NUM_THREADS;
+
             long inicio = System.nanoTime();
 
             for (int i = 0; i < NUM_THREADS; i++) {
                 executor.submit(() -> {
                     for (int j = 0; j < operacoesPorThread; j++) {
-                        int valor = contador.getAndIncrement();
+                        int valor = rand.nextInt();
                         listaCompartilhada.add(valor);
 
-                        synchronized (listaCompartilhada) {
-                            if (!listaCompartilhada.isEmpty()) {
+                        if (!listaCompartilhada.isEmpty()) {
+                            try {
                                 listaCompartilhada.get(rand.nextInt(listaCompartilhada.size()));
-                            }
+                            } catch (IndexOutOfBoundsException ignored) {}
+                        }
 
-                            if (!listaCompartilhada.isEmpty()) {
-                                listaCompartilhada.remove(0);
-                            }
+                        if (!listaCompartilhada.isEmpty()) {
+                            try {
+                                listaCompartilhada.remove(rand.nextInt(listaCompartilhada.size()));
+                            } catch (IndexOutOfBoundsException ignored) {}
                         }
                     }
                 });
@@ -145,33 +142,36 @@ public class Benchmark {
 
             System.out.printf("[%s] 16 Threads - Total de operações: %d - Tempo: %.2fs - Média: %.2f ops/s\n",
                     nome, totalOperacoes, duracao / 1_000_000_000.0, opsPorSegundo);
+
         } finally {
             executor.shutdownNow();
         }
     }
 
-    // Concorrência para ThreadSafeArrayList (que não é List)
-    private static void testarConcorrenciaThreadSafeArrayList(String nome, ThreadSafeArrayList<Integer> listaCompartilhada, int numOperacoes) throws InterruptedException {
+    private static void testarConcorrenciaThreadSafe(String nome, ThreadSafeArrayList<Integer> lista, int numOperacoes) throws InterruptedException {
         ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
         try {
-            AtomicInteger contador = new AtomicInteger();
             Random rand = new Random();
-
             int operacoesPorThread = numOperacoes / NUM_THREADS;
+
             long inicio = System.nanoTime();
 
             for (int i = 0; i < NUM_THREADS; i++) {
                 executor.submit(() -> {
                     for (int j = 0; j < operacoesPorThread; j++) {
-                        int valor = contador.getAndIncrement();
-                        listaCompartilhada.add(valor);
+                        int valor = rand.nextInt();
+                        lista.add(valor);
 
-                        if (listaCompartilhada.size() > 0) {
-                            listaCompartilhada.get(rand.nextInt(listaCompartilhada.size()));
+                        if (lista.size() > 0) {
+                            try {
+                                lista.get(rand.nextInt(lista.size()));
+                            } catch (IndexOutOfBoundsException ignored) {}
                         }
 
-                        if (listaCompartilhada.size() > 0) {
-                            listaCompartilhada.remove(0);
+                        if (lista.size() > 0) {
+                            try {
+                                lista.remove(rand.nextInt(lista.size()));
+                            } catch (IndexOutOfBoundsException ignored) {}
                         }
                     }
                 });
@@ -188,15 +188,15 @@ public class Benchmark {
 
             System.out.printf("[%s] 16 Threads - Total de operações: %d - Tempo: %.2fs - Média: %.2f ops/s\n",
                     nome, totalOperacoes, duracao / 1_000_000_000.0, opsPorSegundo);
+
         } finally {
             executor.shutdownNow();
         }
     }
-
 
     private static void imprimirResultado(String nome, String operacao, int totalOps, long duracaoNano) {
         double duracaoSeg = duracaoNano / 1_000_000_000.0;
         double opsPorSegundo = totalOps / duracaoSeg;
-        System.out.printf("[%s] %s: %.2f ops/s\n", nome, operacao, opsPorSegundo);
+        System.out.printf("[%s] %s: %.2f ops/s (Tempo: %.2fs)\n", nome, operacao, opsPorSegundo, duracaoSeg);
     }
 }
