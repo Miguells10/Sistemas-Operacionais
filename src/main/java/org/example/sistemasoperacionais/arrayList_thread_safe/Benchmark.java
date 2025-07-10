@@ -107,7 +107,8 @@ public class Benchmark {
 
     // Concorrência para Vector (que é List)
     private static void testarConcorrenciaVector(String nome, List<Integer> listaCompartilhada, int numOperacoes) throws InterruptedException {
-        try (ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS)) {
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
+        try {
             AtomicInteger contador = new AtomicInteger();
             Random rand = new Random();
 
@@ -144,12 +145,15 @@ public class Benchmark {
 
             System.out.printf("[%s] 16 Threads - Total de operações: %d - Tempo: %.2fs - Média: %.2f ops/s\n",
                     nome, totalOperacoes, duracao / 1_000_000_000.0, opsPorSegundo);
+        } finally {
+            executor.shutdownNow();
         }
     }
 
     // Concorrência para ThreadSafeArrayList (que não é List)
     private static void testarConcorrenciaThreadSafeArrayList(String nome, ThreadSafeArrayList<Integer> listaCompartilhada, int numOperacoes) throws InterruptedException {
-        try (ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS)) {
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
+        try {
             AtomicInteger contador = new AtomicInteger();
             Random rand = new Random();
 
@@ -184,8 +188,11 @@ public class Benchmark {
 
             System.out.printf("[%s] 16 Threads - Total de operações: %d - Tempo: %.2fs - Média: %.2f ops/s\n",
                     nome, totalOperacoes, duracao / 1_000_000_000.0, opsPorSegundo);
+        } finally {
+            executor.shutdownNow();
         }
     }
+
 
     private static void imprimirResultado(String nome, String operacao, int totalOps, long duracaoNano) {
         double duracaoSeg = duracaoNano / 1_000_000_000.0;
